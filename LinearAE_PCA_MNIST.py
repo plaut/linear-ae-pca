@@ -22,8 +22,8 @@ def LinearAE(y, dimension, learning_rate = 1e-4, regularization = 5e-4, epochs=3
     autoencoder = models.Model(input, decoded)
     autoencoder.compile(optimizer=optimizers.adam(lr=learning_rate), loss='mean_squared_error')
     autoencoder.fit(y, y, epochs=epochs, batch_size=4, shuffle=True)
-    (w2,b2,w1,b1)=autoencoder.get_weights()
-    return (w2,b2,w1,b1)
+    (w1,b1,w2,b2)=autoencoder.get_weights()
+    return (w1,b1,w2,b2)
 
 def PlotResults(p,dimension,name):
     sqrt_dimension = int(np.ceil(np.sqrt(dimension)))
@@ -39,10 +39,10 @@ dimension = 16                                                                  
 shape_y = y.shape                                                               # store shape of y before reshaping it
 y = np.reshape(y,[shape_y[0],shape_y[1]*shape_y[2]]).astype('float32')/255      # reshape y to be a 2D matrix of the dataset
 p_analytical = AnalyticalPCA(y,dimension)                                       # PCA by applying SVD to y
-(w2, _, _, _) = LinearAE(y, dimension)                                          # train a linear autoencoder
-(p_linear_ae, _, _) = np.linalg.svd(w2, full_matrices=False)                    # PCA by applying SVD to linear autoencoder weights
+(_, _, w2, _) = LinearAE(y, dimension)                                          # train a linear autoencoder
+(p_linear_ae, _, _) = np.linalg.svd(w2.T, full_matrices=False)                    # PCA by applying SVD to linear autoencoder weights
 p_analytical = np.reshape(p_analytical,[dimension,shape_y[1],shape_y[2]])       # reshape loading vectors before plotting
-w2 = np.reshape(w2.T,[dimension,shape_y[1],shape_y[2]])                         # reshape autoencoder weights before plotting
+w2 = np.reshape(w2,[dimension,shape_y[1],shape_y[2]])                         # reshape autoencoder weights before plotting
 p_linear_ae = np.reshape(p_linear_ae.T, [dimension, shape_y[1], shape_y[2]])    # reshape loading vectors before plotting
 PlotResults(p_analytical,dimension,'AnalyticalPCA')
 PlotResults(w2,dimension,'W2')
